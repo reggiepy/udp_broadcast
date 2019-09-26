@@ -32,7 +32,6 @@ def get_ipv4_broadcasts():
     addrs = socket.getaddrinfo(hostname, None, family=socket.AF_INET)
     ipv4_broadcasts = From(addrs) \
         .map(lambda x: x[4][0].rpartition(".")) \
-        .filter(lambda x: x[-1] != "1") \
         .map(lambda x: x[0] + ".255") \
         .toOrderSetList()
     return ipv4_broadcasts
@@ -47,7 +46,7 @@ if __name__ == '__main__':
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    s.settimeout(5)
+    s.settimeout(1)
     PORT = 1060
 
     ipv4_broadcasts = get_ipv4_broadcasts()
@@ -60,6 +59,13 @@ if __name__ == '__main__':
             'params': args.cmd
         }
         s.sendto(pickle.dumps(sent_data), (network, PORT))
-        rec = s.recv(65535)
-        b = pickle.loads(rec)
-        print("data:", b['data']['result'])
+        try:
+            rec = s.recv(65535)
+        except Exception as _:
+            pass
+        else:
+            b = pickle.loads(rec)
+            print(network.center(50, "-"))
+            msg = "action:\t\t{}\ncmd:\t\t{}\ndata:\n{}"\
+                .format(args.action, args.cmd, b['data']['result'])
+            print(msg)
