@@ -7,6 +7,25 @@ import socket
 import pickle
 import argparse
 
+
+class From:
+    def __init__(self, src):
+        self.src = src
+
+    def toList(self):
+        return list(self.src)
+
+    def toOrderSetList(self, reverse=False):
+        tmp = self.toList()
+        return sorted(set(tmp), key=tmp.index, reverse=reverse)
+
+    def map(self, func):
+        return From(map(func, self.src))
+
+    def filter(self, predicate):
+        return From(filter(predicate, self.src))
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-a', '--action', help='the action you want to send')
 parser.add_argument('-c', '--cmd', help='the command you want to execute')
@@ -16,14 +35,28 @@ print(args.action, args.cmd)
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
+hostname = socket.gethostname()
+# family: AF_INET ipv4、AF_INET6 ipv6, None 为所有
+addrs = socket.getaddrinfo(hostname, None, family=socket.AF_INET)
+ipv4_broadcasts = From(addrs) \
+    .map(lambda x: x[4][0].rpartition(".")) \
+    .filter(lambda x: x[-1] != "1") \
+    .map(lambda x: x[0] + ".255") \
+    .toOrderSetList()
+
+print(ipv4_broadcasts)
+
 PORT = 1060
 
-network = '<broadcast>'
-sent_data = {
-    'action': args.action,
-    'params': args.cmd
-}
-s.sendto(pickle.dumps(sent_data), (network, PORT))
-rec = s.recv(65535)
-b = pickle.loads(rec)
-print("data:", b['data']['result'])
+# network = '<broadcast>'
+# network = '192.168.1.255'
+for network in ipv4_broadcasts:
+    sent_data = {
+        'action': args.action,
+        'params': args.cmd
+    }
+    s.sendto(pickle.dumps(sent_data), (network, PORT))
+    s.settimeout(5)
+    rec = s.recv(65535)
+    b = pickle.loads(rec)
+    print("data:", b['data']['result'])
