@@ -6,7 +6,7 @@
 import socket
 import pickle
 import argparse
-
+import time
 
 class From:
     def __init__(self, src):
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    s.settimeout(1)
+    s.settimeout(5)
     PORT = 1060
 
     ipv4_broadcasts = get_ipv4_broadcasts()
