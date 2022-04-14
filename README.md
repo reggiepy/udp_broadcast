@@ -4,7 +4,6 @@
 [![release](https://img.shields.io/github/v/tag/reggiepy/udp_broadcast?color=success&label=release)](https://github.com/reggiepy/udp_broadcast)
 [![build status](https://img.shields.io/badge/build-pass-success.svg?style=flat)](https://github.com/reggiepy/udp_broadcast)
 [![License](https://img.shields.io/badge/license-GNU%203.0-success.svg?style=flat)](https://github.com/reggiepy/udp_broadcast)
-[![python Report Card](https://goreportcard.com/badge/github.com/reggiepy/udp_broadcast)](https://goreportcard.com/report/github.com/reggiepy/udp_broadcast)
 
 ## Installation
 
