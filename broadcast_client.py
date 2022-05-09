@@ -73,4 +73,5 @@ if __name__ == '__main__':
             print("socket error: %s exc_info: %s" % (e, sys.exc_info()))
         else:
             result = pickle.loads(rec)
-            print("data:%s%s" % ("\t" * 2, result.data))
+            print("server_ip:%s%s" % ("\t" * 2, result.data["server_ip"]))
+            print("data:%s%s" % ("\t" * 2, result.data["result"]))

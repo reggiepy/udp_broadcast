@@ -10,6 +10,7 @@ import pickle
 import socket
 
 from broadcast_result import result
+from utils import get_all_address
 
 
 def cmd(cmd):
@@ -37,18 +38,25 @@ def main():
     s.bind(('', PORT))
     print('Listen...', s.getsockname())
 
+    addrlist = get_all_address()
+    addr_dict = {addr.rsplit(".", 1)[0]: addr for addr in addrlist}
+
     while True:
         data, address = s.recvfrom(65535)
+        ip, port = address
+        ip_prefix = ip.rsplit(".", 1)[0]
+        try:
+            server_ip = addr_dict[ip_prefix]
+        except KeyError:
+            server_ip = ""
         rec = pickle.loads(data)
         print('<-{}:{}'.format(address, rec))
         sent = ""
         res = ""
         if rec['action'] == "cmd":
-            if not rec["params"]:
-                continue
             if rec["params"]:
                 res = cmd(rec['params'])
-            sent = pickle.dumps(result("cmd", 0, rec['params'], "操作成功", res))
+            sent = pickle.dumps(result("cmd", 0, rec['params'], "操作成功", {"result": res, "server_ip": server_ip}))
             print('-> {}'.format(address))
         s.sendto(sent, address)
 
