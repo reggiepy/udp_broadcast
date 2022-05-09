@@ -15,7 +15,9 @@ cd udp_broadcast
 ## Usage
 
 ```bash
-python broadcast_client.py
+# run in client server
+python broadcast_client.py -c ls
+# run in server server
 python broadcast_server.py
 ```
 
