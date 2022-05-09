@@ -8,38 +8,15 @@ import pickle
 import socket
 import sys
 
-
-class From:
-    def __init__(self, src):
-        self.src = src
-
-    def toList(self):
-        return list(self.src)
-
-    def toOrderSetList(self, reverse=False):
-        tmp = self.toList()
-        return sorted(set(tmp), key=tmp.index, reverse=reverse)
-
-    def map(self, func):
-        return From(map(func, self.src))
-
-    def filter(self, predicate):
-        return From(filter(predicate, self.src))
+from utils import From, get_all_address
 
 
-def gen_ipv4_broadcast(ipv4_address):
+def filter_ipv4_broadcast(ipv4_address):
     return From(ipv4_address) \
+        .filter(lambda x: x != "127.0.0.1") \
         .map(lambda x: x.rpartition(".")) \
         .map(lambda x: x[0] + ".255") \
-        .toOrderSetList()
-
-
-def get_ipv4_broadcasts():
-    hostname = socket.gethostname()
-    # family: AF_INET ipv4、AF_INET6 ipv6, None 为所有
-    addrlist = socket.getaddrinfo(hostname, None, family=socket.AF_INET)
-    ipv4_address = From(addrlist).map(lambda x: x[4][0]).toOrderSetList()
-    return gen_ipv4_broadcast(ipv4_address)
+        .to_order_set_list()
 
 
 if __name__ == '__main__':
@@ -61,14 +38,19 @@ if __name__ == '__main__':
         default=""
     )
     args = parser.parse_args()
-    print(args.action, args.cmd, args.host)
+    print("action:%s%s" % ("\t" * 3, args.action))
+    print("cmd:%s%s" % ("\t" * 3, args.cmd))
+    print("host:%s%s" % ("\t" * 3, args.host))
 
     if args.host:
-        ipv4_broadcasts = gen_ipv4_broadcast(args.host.split(","))
+        ipv4_broadcasts = filter_ipv4_broadcast(args.host.split(","))
     else:
-        ipv4_broadcasts = get_ipv4_broadcasts()
-    print(ipv4_broadcasts)
-
+        ipv4_broadcasts = filter_ipv4_broadcast(get_all_address())
+    print("broadcast:%s%s" % ("\t" * 2, ", ".join(ipv4_broadcasts)))
+    if not ipv4_broadcasts:
+        print("please input one of ipv4 host")
+        exit(1)
+    print()
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     s.settimeout(5)
@@ -78,8 +60,8 @@ if __name__ == '__main__':
     # network = '192.168.1.255'
     for network in ipv4_broadcasts:
         print(network.center(50, "-"))
-        print("action:\t\t%s" % args.action)
-        print("cmd:\t\t%s" % args.cmd)
+        print("action:%s%s" % ("\t" * 2, args.action))
+        print("cmd:%s%s" % ("\t" * 2, args.cmd))
         sent_data = {
             'action': args.action,
             'params': args.cmd
@@ -90,6 +72,5 @@ if __name__ == '__main__':
         except Exception as e:
             print("socket error: %s exc_info: %s" % (e, sys.exc_info()))
         else:
-            b = pickle.loads(rec)
-            data = b['data']['result']
-            print("data:\t\t%s" % data)
+            result = pickle.loads(rec)
+            print("data:%s%s" % ("\t" * 2, result.data))

@@ -3,7 +3,6 @@
 # author: Reggie
 # time:   2019/08/21 13:45
 
-import threading
 import socket
 
 

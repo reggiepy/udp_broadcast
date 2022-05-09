@@ -1,11 +1,28 @@
 # coding=utf-8
-
 # author: Reggie
 # time:   2019/09/26 16:15
+import platform
+import re
 import socket
 import subprocess
-import re
-import platform
+
+
+class From:
+    def __init__(self, src):
+        self.src = src
+
+    def to_list(self):
+        return list(self.src)
+
+    def to_order_set_list(self, reverse=False):
+        tmp = self.to_list()
+        return sorted(set(tmp), key=tmp.index, reverse=reverse)
+
+    def map(self, func):
+        return From(map(func, self.src))
+
+    def filter(self, predicate):
+        return From(filter(predicate, self.src))
 
 
 def get_host_ip():
@@ -19,7 +36,7 @@ def get_host_ip():
     return ip
 
 
-def get_all_host(family="ipv4"):
+def get_all_address(family="ipv4"):
     """
     family: ipv4 or ipv6
     :return:
@@ -32,10 +49,8 @@ def get_all_host(family="ipv4"):
         return []
     hostname = socket.gethostname()
     # family: AF_INET ipv4、AF_INET6 ipv6, None 为所有
-    addrs = socket.getaddrinfo(hostname, None, family=family)
-    # for item in addrs:
-    #     print(item)
-    return [item[4][0] for item in addrs]
+    addrlist = socket.getaddrinfo(hostname, None, family=family)
+    return [item[4][0] for item in addrlist]
 
 
 def find_all_ip(platform):
@@ -137,4 +152,4 @@ if __name__ == '__main__':
     print(find_all_ip(system))
     print(find_all_mask(system))
     print(find_all_broad(system))
-    print(get_all_host())
+    print(get_all_address())

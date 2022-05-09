@@ -5,6 +5,8 @@
 [![build status](https://img.shields.io/badge/build-pass-success.svg?style=flat)](https://github.com/reggiepy/udp_broadcast)
 [![License](https://img.shields.io/badge/license-GNU%203.0-success.svg?style=flat)](https://github.com/reggiepy/udp_broadcast)
 
+The project started to get the IP address of raspberry pie in the network
+
 ## Installation
 
 ```bash

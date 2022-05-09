@@ -9,7 +9,7 @@ import os
 import pickle
 import socket
 
-import version
+from broadcast_result import result
 
 
 def cmd(cmd):
@@ -19,16 +19,14 @@ def cmd(cmd):
     return dat
 
 
-def get_result(action, code, params, message, dat):
-    r = {
-        "version": version.VERSION,
+def get_result(action, code, params, message, data):
+    return {
         "action": action,
         "params": params,
         "code": code,
-        "data": dat,
+        "data": data,
         "message": message
     }
-    return r
 
 
 def main():
@@ -44,12 +42,13 @@ def main():
         rec = pickle.loads(data)
         print('<-{}:{}'.format(address, rec))
         sent = ""
+        res = ""
         if rec['action'] == "cmd":
             if not rec["params"]:
-                print("no params specified")
                 continue
-            res = cmd(rec['params'])
-            sent = pickle.dumps(get_result("cmd", 0, rec['params'], "操作成功", {'result': res}))
+            if rec["params"]:
+                res = cmd(rec['params'])
+            sent = pickle.dumps(result("cmd", 0, rec['params'], "操作成功", res))
             print('-> {}'.format(address))
         s.sendto(sent, address)
 
